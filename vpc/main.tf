@@ -5,6 +5,11 @@ terraform {
       version = "~> 4.16"
     }
   }
+  backend "s3" {
+    bucket = "tetora-poc-terraform-1053"
+    key    = "path/to/my/key"
+    region = "ap-northeast-1"
+  }
 
   required_version = ">= 1.2.0"
 }
