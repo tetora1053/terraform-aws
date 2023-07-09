@@ -177,3 +177,7 @@ resource "aws_route_table_association" "tetora_private_1d" {
   subnet_id      = aws_subnet.tetora_private_1d.id
   route_table_id = aws_route_table.tetora_private_1d.id
 }
+
+output "tetora_private_1a_id" {
+  value = aws_subnet.tetora_private_1a.id
+}
