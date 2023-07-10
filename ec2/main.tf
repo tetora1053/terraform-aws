@@ -1,16 +1,22 @@
 terraform {
+  required_version = ">= 1.2.0"
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 4.16"
     }
   }
+
   backend "s3" {
     bucket = "tetora-poc-terraform-1053"
     key    = "ec2"
     region = "ap-northeast-1"
   }
-  required_version = ">= 1.2.0"
+}
+
+provider "aws" {
+  region = "ap-northeast-1"
 }
 
 data "terraform_remote_state" "vpc" {
@@ -22,37 +28,20 @@ data "terraform_remote_state" "vpc" {
   }
 }
 
+data "terraform_remote_state" "iam" {
+  backend = "s3"
+  config = {
+    bucket = "tetora-poc-terraform-1053"
+    key    = "iam"
+    region = "ap-northeast-1"
+  }
+}
+
 # iam role for ec2 instance profile
-resource "aws_iam_role" "tetora_ec2_role" {
-  name               = "tetora_ec2_role"
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": ["ec2.amazonaws.com"]
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
-}
-EOF
-}
-
-resource "aws_iam_role_policy_attachment" "tetora_ec2_role_policy_attachment" {
-  role       = aws_iam_role.tetora_ec2_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-}
-
 resource "aws_iam_instance_profile" "tetora_ec2_profile" {
   name = "tetora_ec2_profile"
-  role = aws_iam_role.tetora_ec2_role.name
+  role = data.terraform_remote_state.iam.outputs.tetora_ec2_role.name
 }
-
-
 
 resource "aws_instance" "app_server" {
   subnet_id            = data.terraform_remote_state.vpc.outputs.tetora_private_subnets.0.id
