@@ -7,7 +7,7 @@ terraform {
   }
   backend "s3" {
     bucket = "tetora-poc-terraform-1053"
-    key    = "path/to/my/key"
+    key    = "vpc"
     region = "ap-northeast-1"
   }
 
@@ -178,6 +178,10 @@ resource "aws_route_table_association" "tetora_private_1d" {
   route_table_id = aws_route_table.tetora_private_1d.id
 }
 
-output "tetora_private_1a_id" {
-  value = aws_subnet.tetora_private_1a.id
+output "tetora_private_subnets" {
+  value = [
+    aws_subnet.tetora_private_1a,
+    aws_subnet.tetora_private_1c,
+    aws_subnet.tetora_private_1d,
+  ]
 }
